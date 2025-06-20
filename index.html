@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mon Mini Board d’Apps</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 500px;
+      margin: 2rem auto;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    input, button {
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+    }
+
+    input {
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background: #00b894;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background: #019070;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1.2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .app-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+      position: relative;
+      transition: transform 0.2s;
+    }
+
+    .app-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .app-card img {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.5rem;
+    }
+
+    .app-card a {
+      display: block;
+      text-decoration: none;
+      color: #2d3436;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #ff7675;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
+      line-height: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>📱 Mon Mini Board d’Apps</h1>
+
+  <form id="appForm">
+    <input type="text" id="appName" placeholder="Nom de l'app" required />
+    <input type="url" id="appLink" placeholder="Lien (https://...)" required />
+    <input type="url" id="appIcon" placeholder="URL de l’icône (https://...)" required />
+    <button type="submit">Ajouter l'app</button>
+  </form>
+
+  <div id="board"></div>
+
+  <script>
+    const form = document.getElementById('appForm');
+    const board = document.getElementById('board');
+
+    let apps = JSON.parse(localStorage.getItem('apps')) || [];
+
+    const saveApps = () => {
+      localStorage.setItem('apps', JSON.stringify(apps));
+    };
+
+    const renderApps = () => {
+      board.innerHTML = '';
+      apps.forEach((app, index) => {
+        const card = document.createElement('div');
+        card.className = 'app-card';
+
+        card.innerHTML = `
+          <button class="delete-btn" data-index="${index}">×</button>
+          <a href="${app.link}" target="_blank">
+            <img src="${app.icon}" alt="${app.name}" />
+            <div>${app.name}</div>
+          </a>
+        `;
+
+        board.appendChild(card);
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const i = e.target.dataset.index;
+          apps.splice(i, 1);
+          saveApps();
+          renderApps();
+        });
+      });
+    };
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('appName').value.trim();
+      const link = document.getElementById('appLink').value.trim();
+      const icon = document.getElementById('appIcon').value.trim();
+
+      if (name && link && icon) {
+        apps.push({ name, link, icon });
+        saveApps();
+        renderApps();
+        form.reset();
+      }
+    });
+
+    renderApps();
+  </script>
+</body>
+</html>
